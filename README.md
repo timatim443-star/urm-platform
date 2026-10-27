@@ -40,6 +40,7 @@ docker compose exec urm python tools/doctor.py  # проверить подкл�
 
 ```bash
 pip install -r requirements.txt
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ./run_demo.sh
 ```
 
