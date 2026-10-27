@@ -1,0 +1,31 @@
+[server]
+headless = true
+address = "0.0.0.0"
+port = 8501
+enableCORS = true
+enableXsrfProtection = true
+fileWatcherType = "none"
+maxUploadSize = 5
+# За reverse-proxy укажите его адрес:
+# corsAllowedOrigins = ["https://urm.example.kz"]
+
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"
+showErrorDetails = false
+
+[theme]
+base = "light"
+primaryColor = "#0088C8"
+backgroundColor = "#F3F6F9"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#13263D"
+font = "'Segoe UI', Inter, Roboto, 'Helvetica Neue', Arial, sans-serif"
+baseFontSize = 14
+baseRadius = "8px"
+buttonRadius = "8px"
+borderColor = "#D3DCE6"
+showWidgetBorder = true
+showSidebarBorder = true

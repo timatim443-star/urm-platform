@@ -1,0 +1,15 @@
+.git
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+snapshots/
+.ruff_cache/
+urmvenv/
+tests/
+docs/
+.github/
+.pytest_cache/
+*.md
+run_demo.*

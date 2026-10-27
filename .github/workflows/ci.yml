@@ -1,0 +1,66 @@
+# Проверка каждого изменения: стиль, тесты (с настоящим PostgreSQL), сборка образа.
+# На тег вида v2.1.0 образ дополнительно публикуется в GitHub Container Registry:
+#   ghcr.io/<владелец>/<репозиторий>:2.1.0
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: pg_test
+          POSTGRES_DB: URMCI
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGDATABASE: URMCI
+      PGSSLMODE: disable
+      URM_RO_USER: postgres
+      URM_RO_PASSWORD: pg_test
+      URM_RW_USER: postgres
+      URM_RW_PASSWORD: pg_test
+      URM_TEST_PG: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt pytest ruff
+      - name: Стиль и ошибки
+        run: ruff check .
+      - name: Тестовая схема urm2
+        run: PGPASSWORD=pg_test psql -h 127.0.0.1 -U postgres -d URMCI -v ON_ERROR_STOP=1 -f sql/dev/sandbox_schema.sql
+      - name: Тесты
+        run: python -m pytest
+
+  image:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Сборка образа
+        run: docker build --build-arg URM_VERSION=$(cat VERSION) -t urm-platform:$(cat VERSION) .
+      - name: Публикация в GHCR (только для тегов v*)
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          docker tag urm-platform:$(cat VERSION) $IMAGE:$(cat VERSION)
+          docker tag urm-platform:$(cat VERSION) $IMAGE:latest
+          docker push $IMAGE:$(cat VERSION)
+          docker push $IMAGE:latest

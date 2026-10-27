@@ -1,0 +1,14 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+urmv/
+snapshots/
+.ruff_cache/
+urmvenv/
+tests/.snapshots/
+.pytest_cache/
+*.log
+_sessions.json
+_sessions.json.part
